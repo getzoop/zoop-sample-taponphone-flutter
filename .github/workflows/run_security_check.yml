@@ -1,0 +1,14 @@
+name: TFSEC Workflow
+
+on:
+  push:
+    branches: [ master, main, develop, release/* ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  tfsec:
+    name: TFSec
+    uses: getzoop/gha-workflows/.github/workflows/tfsec.yml@v5
+    with:
+      working-dir: deployment/terraform/
