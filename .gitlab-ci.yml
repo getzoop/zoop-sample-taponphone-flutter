@@ -3,4 +3,4 @@ include:
   ref: ifood-security-4-edge
   file: pipelines/ifood-security/main.yml
 variables:
-  SERVICE_NAME: zp-zoop-template
+  SERVICE_NAME: zoop-sample-taponphone-flutter
