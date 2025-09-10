@@ -1,66 +1,27 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-
+import 'package:path_provider/path_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:zoop_sdk_taponphone_flutter/components/zoop_qr_code_image.dart';
-import 'package:zoop_sdk_taponphone_flutter/model/application_event.dart';
-import 'package:zoop_sdk_taponphone_flutter/model/configuration/back_button_configuration.dart';
-import 'package:zoop_sdk_taponphone_flutter/model/configuration/back_icon_configuration.dart';
-import 'package:zoop_sdk_taponphone_flutter/model/configuration/beep_volume_config.dart';
-import 'package:zoop_sdk_taponphone_flutter/model/configuration/card_animation_arrangement.dart';
-import 'package:zoop_sdk_taponphone_flutter/model/configuration/card_animation_type.dart';
-import 'package:zoop_sdk_taponphone_flutter/model/configuration/config_parameters.dart';
-import 'package:zoop_sdk_taponphone_flutter/model/configuration/credentials.dart';
-import 'package:zoop_sdk_taponphone_flutter/model/configuration/error_code_text_style.dart';
-import 'package:zoop_sdk_taponphone_flutter/model/configuration/error_message_text_style.dart';
-import 'package:zoop_sdk_taponphone_flutter/model/configuration/error_screen_configuration.dart';
-import 'package:zoop_sdk_taponphone_flutter/model/configuration/header_text_content.dart';
-import 'package:zoop_sdk_taponphone_flutter/model/configuration/message_event.dart';
-import 'package:zoop_sdk_taponphone_flutter/model/configuration/messages_event_status.dart';
-import 'package:zoop_sdk_taponphone_flutter/model/configuration/pinpad_type.dart';
-import 'package:zoop_sdk_taponphone_flutter/model/configuration/sdk_config.dart';
-import 'package:zoop_sdk_taponphone_flutter/model/configuration/tap_on_phone_theme.dart';
-import 'package:zoop_sdk_taponphone_flutter/model/configuration/text_configuration.dart';
-import 'package:zoop_sdk_taponphone_flutter/model/configuration/timeout_config.dart';
-import 'package:zoop_sdk_taponphone_flutter/model/externall_seller.dart';
-import 'package:zoop_sdk_taponphone_flutter/model/pay_request.dart';
-import 'package:zoop_sdk_taponphone_flutter/model/payment_type.dart';
-import 'package:zoop_sdk_taponphone_flutter/model/pix_request.dart';
-import 'package:zoop_sdk_taponphone_flutter/zoop_sdk_taponphone_flutter.dart';
+import 'package:zoop_sdk_taponphone_flutter/zoop_sdk_taponphone_library.dart';
+
 
 void main() async {
   await dotenv.load(fileName: ".env"); // Carrega o arquivo .env
-  ZoopSdkTaponphoneFlutter().kernelInitialize();
-  runApp(const MyApp());
+  ZoopSdkTaponphone().kernelInitialize();
+  runApp(MaterialApp(home: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
@@ -71,15 +32,6 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
   final String title;
 
   @override
@@ -87,7 +39,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final _zoopSdkTaponphoneFlutterPlugin = ZoopSdkTaponphoneFlutter();
+  final _zoopSdkTaponphoneFlutterPlugin = ZoopSdkTaponphone();
   String _message = "Tap on phone not Initialized";
   PaymentType? _paymentType =
       PaymentType.credit; // Tipo de pagamento selecionado
@@ -138,10 +90,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void getApplicationEvent() {
     _zoopSdkTaponphoneFlutterPlugin.getApplicationEvent().listen(
-      (dynamic event) {
-        debugPrint(
-          "Event from native: ${ApplicationEvent.fromValue(event) ?? "Unknown event"}",
-        );
+          (dynamic event) {
+        debugPrint("Event from native: ${ApplicationEvent.fromValue(event)?.name ?? ""}");
       },
       onError: (dynamic error) {
         debugPrint("Error: $error");
@@ -187,9 +137,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
       setState(() {
         _message = result;
-        debugPrint(
-          "applicationEvent[Flutter] called: ${ApplicationEvent.fromValue(result)}",
-        );
       });
     } on PlatformException catch (e) {
       setState(() {
@@ -227,6 +174,20 @@ class _MyHomePageState extends State<MyHomePage> {
       String? logoPath = await loadImageAsTemporaryPath('assets/android_24dp.png');
       String? cancelIconPath = await loadImageAsTemporaryPath('assets/close_24dp.png');
 
+
+      var gradientStops = List<GradientStop>.of([
+        GradientStop(
+          color: Color(0x7FFF0000).toARGB32(),
+          location: 0.0,
+          opacity: 1.0,
+        ),
+        GradientStop(
+          color: Color(0x7FFFFFFF).toARGB32(),
+          location: 1.0,
+          opacity: 1.0,
+        )
+      ]);
+
       TapOnPhoneTheme theme = TapOnPhoneTheme(
         logo: logoPath,
         backgroundColor: int.tryParse("0x00FFDAB9"),
@@ -238,13 +199,19 @@ class _MyHomePageState extends State<MyHomePage> {
         marginTopDPPaymentType: 8.0,
         statusTextColor: int.tryParse("0x7FCC5500"),
         brandBackgroundColor: "F00000",
-        cardAnimation: await loadImageAsTemporaryPath(
-          'assets/card_animation.json',
-        ),
+        cardAnimation: await loadImageAsTemporaryPath('assets/card_animation.json'),
         cardAnimationResources: {
-          CardAnimationType.holdCard.name: await loadImageAsTemporaryPath('assets/card_animation.json') ?? "",
+          CardAnimationType.startActiveTerminal.name: ?await loadImageAsTemporaryPath('assets/start_activate_terminal.json'),
+          CardAnimationType.completeActiveTerminal.name: ?await loadImageAsTemporaryPath('assets/complete_activate_terminal.json'),
+          CardAnimationType.startPaymentProcess.name: ?await loadImageAsTemporaryPath('assets/start_payment_process.json'),
+          CardAnimationType.startContactlessReading.name: ?await loadImageAsTemporaryPath('assets/start_contactless_reading.json'),
+          CardAnimationType.authorisingPleaseWait.name: ?await loadImageAsTemporaryPath('assets/authorising_please_wait.json'),
+          CardAnimationType.startCardReading.name: ?await loadImageAsTemporaryPath('assets/start_card_reading.json'),
+          CardAnimationType.startCardReadingAgain.name: ?await loadImageAsTemporaryPath('assets/start_card_reading_again.json'),
+          CardAnimationType.tryAnotherCard.name: ?await loadImageAsTemporaryPath('assets/try_another_card.json'),
+          CardAnimationType.holdCard.name: ?await loadImageAsTemporaryPath('assets/card_animation.json')
         },
-        cardAnimationArrangement: Top(marginTop: 24),
+        cardAnimationArrangement: Bottom(marginBottom: 24),
         cardAnimationSize: 512,
         headerMessagesEventStatus: {
           MessagesEventStatus.startCardReading.name: MessageEvent(
@@ -313,6 +280,11 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         topCancelIcon: cancelIconPath,
         statusBarColor: int.tryParse("0x7FFB8C00"),
+
+        //IOS
+        textColor: Color(0x7FFF0000).toARGB32(),
+        loadingColor:  Color(0x7FFF0000).toARGB32(),
+        gradientStops: gradientStops,
       );
 
       SdkConfig sdkConfig = SdkConfig(
@@ -324,7 +296,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
       ConfigParameters configParameters = ConfigParameters(
         credentials: credentials,
-        sdkConfig: sdkConfig
+        sdkConfig: sdkConfig,
+        environment: TapOnPhoneEnvironment(type: Environment.staging),
+        logLevel: TapOnPhoneLogLevel(level: LogLevel.debug),
       );
 
       String result =
@@ -450,27 +424,16 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
       body: SingleChildScrollView(
         physics: BouncingScrollPhysics(), // rolagem suave
         padding: EdgeInsets.all(16.0), // padding externo
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             Container(
               alignment: Alignment.center,

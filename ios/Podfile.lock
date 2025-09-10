@@ -1,0 +1,41 @@
+PODS:
+  - Flutter (1.0.0)
+  - path_provider_foundation (0.0.1):
+    - Flutter
+    - FlutterMacOS
+  - TapOnPhone-iOS (3.2.1)
+  - zoop_sdk_taponphone_flutter (0.0.1):
+    - Flutter
+    - TapOnPhone-iOS
+
+DEPENDENCIES:
+  - Flutter (from `Flutter`)
+  - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
+  - TapOnPhone-iOS (from `https://github.com/getzoop/zoop-package-public.git`, branch `release-zoop-sdk-taponphone-ios-3.2.1`)
+  - zoop_sdk_taponphone_flutter (from `.symlinks/plugins/zoop_sdk_taponphone_flutter/ios`)
+
+EXTERNAL SOURCES:
+  Flutter:
+    :path: Flutter
+  path_provider_foundation:
+    :path: ".symlinks/plugins/path_provider_foundation/darwin"
+  TapOnPhone-iOS:
+    :branch: release-zoop-sdk-taponphone-ios-3.2.1
+    :git: https://github.com/getzoop/zoop-package-public.git
+  zoop_sdk_taponphone_flutter:
+    :path: ".symlinks/plugins/zoop_sdk_taponphone_flutter/ios"
+
+CHECKOUT OPTIONS:
+  TapOnPhone-iOS:
+    :commit: 3b49cb343038691592897e1a6dc0de2a1780d42e
+    :git: https://github.com/getzoop/zoop-package-public.git
+
+SPEC CHECKSUMS:
+  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+  path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
+  TapOnPhone-iOS: 85a69a86c249670f8d21622410447fca697ce0f9
+  zoop_sdk_taponphone_flutter: c0e8f9a461c5ef4fd6d24532571784d0a90c736a
+
+PODFILE CHECKSUM: af865a349511a2d54a7f07774fd70f481288a868
+
+COCOAPODS: 1.16.2
