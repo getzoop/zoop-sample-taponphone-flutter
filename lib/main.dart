@@ -224,11 +224,8 @@ class _MyHomePageState extends State<MyHomePage> {
         beepVolumeConfig = BeepVolumeConfig(beepVolume: beepVolume.toDouble());
       }
 
-      String? logoPath = await loadImageAsTemporaryPath('assets/android_24dp.png');
-      String? cancelIconPath = await loadImageAsTemporaryPath('assets/close_24dp.png');
-
       TapOnPhoneTheme theme = TapOnPhoneTheme(
-        logo: logoPath,
+        logo: "assets/android_24dp.png",
         backgroundColor: int.tryParse("0x00FFDAB9"),
         footerBackgroundColor: int.tryParse("0x7FFFCC80"),
         amountTextColor: int.tryParse("0x7FFB8C00"),
@@ -311,7 +308,7 @@ class _MyHomePageState extends State<MyHomePage> {
             isVisible: true,
           ),
         ),
-        topCancelIcon: cancelIconPath,
+        topCancelIcon: "assets/close_24dp.png",
         statusBarColor: int.tryParse("0x7FFB8C00"),
       );
 
