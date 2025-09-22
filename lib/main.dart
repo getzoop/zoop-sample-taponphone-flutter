@@ -128,14 +128,6 @@ class _MyHomePageState extends State<MyHomePage> {
     getApplicationEvent();
   }
 
-  Future<String?> loadImageAsTemporaryPath(String assetPath) async {
-    final byteData = await rootBundle.load(assetPath);
-    final tempDir = await getTemporaryDirectory();
-    final file = File('${tempDir.path}/${assetPath.split('/').last}');
-    await file.writeAsBytes(byteData.buffer.asUint8List());
-    return file.path;
-  }
-
   void getApplicationEvent() {
     _zoopSdkTaponphoneFlutterPlugin.getApplicationEvent().listen(
       (dynamic event) {
@@ -224,11 +216,8 @@ class _MyHomePageState extends State<MyHomePage> {
         beepVolumeConfig = BeepVolumeConfig(beepVolume: beepVolume.toDouble());
       }
 
-      String? logoPath = await loadImageAsTemporaryPath('assets/android_24dp.png');
-      String? cancelIconPath = await loadImageAsTemporaryPath('assets/close_24dp.png');
-
       TapOnPhoneTheme theme = TapOnPhoneTheme(
-        logo: logoPath,
+        logo:  "assets/zoop.png",
         backgroundColor: int.tryParse("0x00FFDAB9"),
         footerBackgroundColor: int.tryParse("0x7FFFCC80"),
         amountTextColor: int.tryParse("0x7FFB8C00"),
@@ -238,11 +227,9 @@ class _MyHomePageState extends State<MyHomePage> {
         marginTopDPPaymentType: 8.0,
         statusTextColor: int.tryParse("0x7FCC5500"),
         brandBackgroundColor: "F00000",
-        cardAnimation: await loadImageAsTemporaryPath(
-          'assets/card_animation.json',
-        ),
+        cardAnimation: "assets/card_animation.json",
         cardAnimationResources: {
-          CardAnimationType.holdCard.name: await loadImageAsTemporaryPath('assets/card_animation.json') ?? "",
+          CardAnimationType.holdCard.name: "assets/card_animation.json",
         },
         cardAnimationArrangement: Top(marginTop: 24),
         cardAnimationSize: 512,
@@ -311,7 +298,7 @@ class _MyHomePageState extends State<MyHomePage> {
             isVisible: true,
           ),
         ),
-        topCancelIcon: cancelIconPath,
+        topCancelIcon: "assets/close_icon.png",
         statusBarColor: int.tryParse("0x7FFB8C00"),
       );
 
