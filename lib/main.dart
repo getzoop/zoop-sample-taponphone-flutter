@@ -5,31 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:zoop_sdk_taponphone_flutter/components/zoop_qr_code_image.dart';
-import 'package:zoop_sdk_taponphone_flutter/model/application_event.dart';
-import 'package:zoop_sdk_taponphone_flutter/model/configuration/back_button_configuration.dart';
-import 'package:zoop_sdk_taponphone_flutter/model/configuration/back_icon_configuration.dart';
-import 'package:zoop_sdk_taponphone_flutter/model/configuration/beep_volume_config.dart';
-import 'package:zoop_sdk_taponphone_flutter/model/configuration/card_animation_arrangement.dart';
-import 'package:zoop_sdk_taponphone_flutter/model/configuration/card_animation_type.dart';
-import 'package:zoop_sdk_taponphone_flutter/model/configuration/config_parameters.dart';
-import 'package:zoop_sdk_taponphone_flutter/model/configuration/credentials.dart';
-import 'package:zoop_sdk_taponphone_flutter/model/configuration/error_code_text_style.dart';
-import 'package:zoop_sdk_taponphone_flutter/model/configuration/error_message_text_style.dart';
-import 'package:zoop_sdk_taponphone_flutter/model/configuration/error_screen_configuration.dart';
-import 'package:zoop_sdk_taponphone_flutter/model/configuration/header_text_content.dart';
-import 'package:zoop_sdk_taponphone_flutter/model/configuration/message_event.dart';
-import 'package:zoop_sdk_taponphone_flutter/model/configuration/messages_event_status.dart';
-import 'package:zoop_sdk_taponphone_flutter/model/configuration/pinpad_type.dart';
-import 'package:zoop_sdk_taponphone_flutter/model/configuration/sdk_config.dart';
-import 'package:zoop_sdk_taponphone_flutter/model/configuration/tap_on_phone_theme.dart';
-import 'package:zoop_sdk_taponphone_flutter/model/configuration/text_configuration.dart';
-import 'package:zoop_sdk_taponphone_flutter/model/configuration/timeout_config.dart';
-import 'package:zoop_sdk_taponphone_flutter/model/externall_seller.dart';
-import 'package:zoop_sdk_taponphone_flutter/model/pay_request.dart';
-import 'package:zoop_sdk_taponphone_flutter/model/payment_type.dart';
-import 'package:zoop_sdk_taponphone_flutter/model/pix_request.dart';
-import 'package:zoop_sdk_taponphone_flutter/zoop_sdk_taponphone_flutter.dart';
+import 'package:zoop_sdk_taponphone_flutter/zoop_sdk_taponphone_library.dart';
 
 void main() async {
   await dotenv.load(fileName: ".env"); // Carrega o arquivo .env
