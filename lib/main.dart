@@ -1,12 +1,11 @@
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'package:path_provider/path_provider.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:zoop_sdk_taponphone_flutter/zoop_sdk_taponphone_library.dart';
-
 
 void main() async {
   await dotenv.load(fileName: ".env"); // Carrega o arquivo .env
@@ -189,7 +188,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ]);
 
       TapOnPhoneTheme theme = TapOnPhoneTheme(
-        logo: logoPath,
+        logo: "assets/images/android_24dp.png",
         backgroundColor: int.tryParse("0x00FFDAB9"),
         footerBackgroundColor: int.tryParse("0x7FFFCC80"),
         amountTextColor: int.tryParse("0x7FFB8C00"),
@@ -199,19 +198,11 @@ class _MyHomePageState extends State<MyHomePage> {
         marginTopDPPaymentType: 8.0,
         statusTextColor: int.tryParse("0x7FCC5500"),
         brandBackgroundColor: "F00000",
-        cardAnimation: await loadImageAsTemporaryPath('assets/card_animation.json'),
+        cardAnimation: "assets/animations/card_animation.json",
         cardAnimationResources: {
-          CardAnimationType.startActiveTerminal.name: ?await loadImageAsTemporaryPath('assets/start_activate_terminal.json'),
-          CardAnimationType.completeActiveTerminal.name: ?await loadImageAsTemporaryPath('assets/complete_activate_terminal.json'),
-          CardAnimationType.startPaymentProcess.name: ?await loadImageAsTemporaryPath('assets/start_payment_process.json'),
-          CardAnimationType.startContactlessReading.name: ?await loadImageAsTemporaryPath('assets/start_contactless_reading.json'),
-          CardAnimationType.authorisingPleaseWait.name: ?await loadImageAsTemporaryPath('assets/authorising_please_wait.json'),
-          CardAnimationType.startCardReading.name: ?await loadImageAsTemporaryPath('assets/start_card_reading.json'),
-          CardAnimationType.startCardReadingAgain.name: ?await loadImageAsTemporaryPath('assets/start_card_reading_again.json'),
-          CardAnimationType.tryAnotherCard.name: ?await loadImageAsTemporaryPath('assets/try_another_card.json'),
-          CardAnimationType.holdCard.name: ?await loadImageAsTemporaryPath('assets/card_animation.json')
+          CardAnimationType.holdCard.name: "assets/animations/card_animation.json",
         },
-        cardAnimationArrangement: Bottom(marginBottom: 24),
+        cardAnimationArrangement: Top(marginTop: 24),
         cardAnimationSize: 512,
         headerMessagesEventStatus: {
           MessagesEventStatus.startCardReading.name: MessageEvent(
@@ -278,13 +269,8 @@ class _MyHomePageState extends State<MyHomePage> {
             isVisible: true,
           ),
         ),
-        topCancelIcon: cancelIconPath,
+        topCancelIcon: "assets/images/close_24dp.png",
         statusBarColor: int.tryParse("0x7FFB8C00"),
-
-        //IOS
-        textColor: Color(0x7FFF0000).toARGB32(),
-        loadingColor:  Color(0x7FFF0000).toARGB32(),
-        gradientStops: gradientStops,
       );
 
       SdkConfig sdkConfig = SdkConfig(
@@ -296,9 +282,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
       ConfigParameters configParameters = ConfigParameters(
         credentials: credentials,
-        sdkConfig: sdkConfig,
-        environment: TapOnPhoneEnvironment(type: Environment.staging),
-        logLevel: TapOnPhoneLogLevel(level: LogLevel.debug),
+        sdkConfig: sdkConfig
       );
 
       String result =
@@ -424,16 +408,27 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    // This method is rerun every time setState is called, for instance as done
+    // by the _incrementCounter method above.
+    //
+    // The Flutter framework has been optimized to make rerunning build methods
+    // fast, so that you can just rebuild anything that needs updating rather
+    // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
+        // TRY THIS: Try changing the color here to a specific color (to
+        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
+        // change color while the other colors stay the same.
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        // Here we take the value from the MyHomePage object that was created by
+        // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
       body: SingleChildScrollView(
         physics: BouncingScrollPhysics(), // rolagem suave
         padding: EdgeInsets.all(16.0), // padding externo
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Container(
               alignment: Alignment.center,
