@@ -9,34 +9,18 @@ import 'package:zoop_sdk_taponphone_flutter/zoop_sdk_taponphone_library.dart';
 
 void main() async {
   await dotenv.load(fileName: ".env"); // Carrega o arquivo .env
-  ZoopSdkTaponphoneFlutter().kernelInitialize();
-  runApp(const MyApp());
+  ZoopSdkTaponphone().kernelInitialize();
+  runApp(MaterialApp(home: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
@@ -47,15 +31,6 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
   final String title;
 
   @override
@@ -63,7 +38,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final _zoopSdkTaponphoneFlutterPlugin = ZoopSdkTaponphoneFlutter();
+  final _zoopSdkTaponphoneFlutterPlugin = ZoopSdkTaponphone();
   String _message = "Tap on phone not Initialized";
   PaymentType? _paymentType =
       PaymentType.credit; // Tipo de pagamento selecionado
@@ -114,10 +89,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void getApplicationEvent() {
     _zoopSdkTaponphoneFlutterPlugin.getApplicationEvent().listen(
-      (dynamic event) {
-        debugPrint(
-          "Event from native: ${ApplicationEvent.fromValue(event) ?? "Unknown event"}",
-        );
+          (dynamic event) {
+        debugPrint("Event from native: ${ApplicationEvent.fromValue(event)?.name ?? ""}");
       },
       onError: (dynamic error) {
         debugPrint("Error: $error");
@@ -163,9 +136,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
       setState(() {
         _message = result;
-        debugPrint(
-          "applicationEvent[Flutter] called: ${ApplicationEvent.fromValue(result)}",
-        );
       });
     } on PlatformException catch (e) {
       setState(() {
@@ -199,6 +169,23 @@ class _MyHomePageState extends State<MyHomePage> {
       if (beepVolume != null) {
         beepVolumeConfig = BeepVolumeConfig(beepVolume: beepVolume.toDouble());
       }
+
+      String? logoPath = await loadImageAsTemporaryPath('assets/android_24dp.png');
+      String? cancelIconPath = await loadImageAsTemporaryPath('assets/close_24dp.png');
+
+
+      var gradientStops = List<GradientStop>.of([
+        GradientStop(
+          color: Color(0x7FFF0000).toARGB32(),
+          location: 0.0,
+          opacity: 1.0,
+        ),
+        GradientStop(
+          color: Color(0x7FFFFFFF).toARGB32(),
+          location: 1.0,
+          opacity: 1.0,
+        )
+      ]);
 
       TapOnPhoneTheme theme = TapOnPhoneTheme(
         logo: "assets/images/android_24dp.png",
