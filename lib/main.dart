@@ -9,7 +9,10 @@ import 'package:zoop_sdk_taponphone_flutter/zoop_sdk_taponphone_library.dart';
 
 void main() async {
   await dotenv.load(fileName: ".env"); // Carrega o arquivo .env
-  ZoopSdkTaponphone().kernelInitialize();
+
+  if (Platform.isAndroid) {
+    ZoopSdkTaponphone().kernelInitialize();
+  }
   runApp(MaterialApp(home: MyApp()));
 }
 
@@ -38,7 +41,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final _zoopSdkTaponphoneFlutterPlugin = ZoopSdkTaponphone();
+  final _zoopSdkTaponphonePlugin = ZoopSdkTaponphone();
   String _message = "Tap on phone not Initialized";
   PaymentType? _paymentType =
       PaymentType.credit; // Tipo de pagamento selecionado
@@ -76,21 +79,20 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+
+    if (Platform.isIOS) {
+      paymentTypes.remove(PaymentType.pix);
+    }
+
     getApplicationEvent();
   }
 
-  Future<String?> loadImageAsTemporaryPath(String assetPath) async {
-    final byteData = await rootBundle.load(assetPath);
-    final tempDir = await getTemporaryDirectory();
-    final file = File('${tempDir.path}/${assetPath.split('/').last}');
-    await file.writeAsBytes(byteData.buffer.asUint8List());
-    return file.path;
-  }
-
   void getApplicationEvent() {
-    _zoopSdkTaponphoneFlutterPlugin.getApplicationEvent().listen(
-          (dynamic event) {
-        debugPrint("Event from native: ${ApplicationEvent.fromValue(event)?.name ?? ""}");
+    _zoopSdkTaponphonePlugin.getApplicationEvent().listen(
+      (dynamic event) {
+        debugPrint(
+          "Event from native: ${ApplicationEvent.fromValue(event) ?? "Unknown event"}",
+        );
       },
       onError: (dynamic error) {
         debugPrint("Error: $error");
@@ -104,16 +106,16 @@ class _MyHomePageState extends State<MyHomePage> {
         _message = "Await Initialization...";
       });
 
-      String result =
-          await _zoopSdkTaponphoneFlutterPlugin.initialize() ??
-          'SDK initialization failed';
+      ZoopSdkInitializationStatus? result = await _zoopSdkTaponphonePlugin
+          .initialize();
 
       setState(() {
-        _message = result;
+        _message = result?.name ?? 'SDK initialization failed';
       });
-    } on PlatformException catch (e) {
+    } on ZoopSdkException catch (e) {
+      debugPrint("ZoopSdkException: ${e.code} - ${e.message}");
       setState(() {
-        _message = "Erro: ${e.message}";
+        _message = "${e.code} - ${e.message}";
       });
     }
   }
@@ -125,21 +127,23 @@ class _MyHomePageState extends State<MyHomePage> {
       });
 
       final payRequest = PayRequest(
-          amount: amount,
-          paymentType: _paymentType!.value,
-          installments: installments,
-          metadata: metadata
+        amount: amount,
+        paymentType: _paymentType!.value,
+        installments: installments,
+        metadata: metadata,
       );
-      String result =
-          await _zoopSdkTaponphoneFlutterPlugin.pay(payRequest) ?? 'Payment failed';
 
+      final ZoopSdkResult? result = await _zoopSdkTaponphonePlugin.pay(
+        payRequest,
+      );
 
       setState(() {
-        _message = result;
+        _message =
+            "Payment successful, transactionId: ${result!.transactionId}";
       });
-    } on PlatformException catch (e) {
+    } on ZoopSdkException catch (e) {
       setState(() {
-        _message = e.message ?? "Payment error";
+        _message = "${e.code} - ${e.message}";
       });
     }
   }
@@ -151,13 +155,17 @@ class _MyHomePageState extends State<MyHomePage> {
       });
       final beepVolume = this.beepVolume;
       BeepVolumeConfig? beepVolumeConfig;
+      Attestation attestation = Attestation(
+        clientId: clientId,
+        clientSecret: clientSecret,
+      );
       Credentials credentials = Credentials(
-        clientId,
-        clientSecret,
-        marketplace,
-        seller,
-        accessKey,
-        null,
+        clientId: clientId,
+        clientSecret: clientSecret,
+        marketplace: marketplace,
+        seller: seller,
+        accessKey: accessKey,
+        attestation: attestation,
       );
       TimeoutConfig timeoutConfig = TimeoutConfig(
         discoveryTimeout: discoveryTimeout,
@@ -170,46 +178,50 @@ class _MyHomePageState extends State<MyHomePage> {
         beepVolumeConfig = BeepVolumeConfig(beepVolume: beepVolume.toDouble());
       }
 
-      String? logoPath = await loadImageAsTemporaryPath('assets/android_24dp.png');
-      String? cancelIconPath = await loadImageAsTemporaryPath('assets/close_24dp.png');
-
-
       var gradientStops = List<GradientStop>.of([
-        GradientStop(
-          color: Color(0x7FFF0000).toARGB32(),
-          location: 0.0,
-          opacity: 1.0,
-        ),
-        GradientStop(
-          color: Color(0x7FFFFFFF).toARGB32(),
-          location: 1.0,
-          opacity: 1.0,
-        )
+        GradientStop(color: "7FFF0000", location: 0.0, opacity: 1.0),
+        GradientStop(color: "7FFFFFFF", location: 1.0, opacity: 1.0),
       ]);
 
       TapOnPhoneTheme theme = TapOnPhoneTheme(
-        logo: "assets/images/android_24dp.png",
-        backgroundColor: int.tryParse("0x00FFDAB9"),
-        footerBackgroundColor: int.tryParse("0x7FFFCC80"),
-        amountTextColor: int.tryParse("0x7FFB8C00"),
-        paymentTypeTextColor: int.tryParse("0x7FFB8C00"),
+        logo: "assets/images/zoop.png",
+        backgroundColor: "#00FFDAB9",
+        footerBackgroundColor: "#FFFF5722",
+        amountTextColor: "#FFFFFFFF",
+        paymentTypeTextColor: "#FFFFFFFF",
         marginTopDPStatusMessages: 40.0,
-        marginTopDPAmount: 0,
         marginTopDPPaymentType: 8.0,
-        statusTextColor: int.tryParse("0x7FCC5500"),
-        brandBackgroundColor: "F00000",
+        statusTextColor: "#FF0A0A0A",
+        brandBackgroundColor: "#FFF00000",
         cardAnimation: "assets/animations/card_animation.json",
         cardAnimationResources: {
-          CardAnimationType.holdCard.name: "assets/animations/card_animation.json",
+          CardAnimationType.terminalActivationStarted.name:
+              "assets/animations/start_activate_terminal.json",
+          CardAnimationType.terminalActivationFinished.name:
+              "assets/animations/complete_activate_terminal.json",
+          CardAnimationType.paymentProcessStarted.name:
+              "assets/animations/start_payment_process.json",
+          CardAnimationType.startContactlessReading.name:
+              "assets/animations/start_contactless_reading.json",
+          CardAnimationType.authorisingPleaseWait.name:
+              "assets/animations/authorising_please_wait.json",
+          CardAnimationType.cardReadingStarted.name:
+              "assets/animations/start_card_reading.json",
+          CardAnimationType.cardReadingRetry.name:
+              "assets/animations/start_card_reading_again.json",
+          CardAnimationType.tryAnotherCard.name:
+              "assets/animations/try_another_card.json",
+          CardAnimationType.holdCardSteady.name:
+              "assets/animations/card_animation.json",
         },
-        cardAnimationArrangement: Top(marginTop: 24),
+        cardAnimationArrangement: Bottom(marginBottom: 500),
         cardAnimationSize: 512,
-        headerMessagesEventStatus: {
-          MessagesEventStatus.startCardReading.name: MessageEvent(
-            title: "Aproxime o cartão header",
-            subtitle: "Aproxime o cartão no leitor header",
-          ),
-        },
+        // headerMessagesEventStatus: {
+        //   MessagesEventStatus.cardReadingStarted.name: MessageEvent(
+        //     title: "Aproxime o cartão header",
+        //     subtitle: "Aproxime o cartão no leitor header",
+        //   ),
+        // },
         pinPadType: PinpadType.shifted,
         headerTextContent: HeaderTextContent(
           title: TextConfiguration(text: "Title"),
@@ -217,23 +229,23 @@ class _MyHomePageState extends State<MyHomePage> {
           updateFromEvents: true,
         ),
         messagesEventStatus: {
-          MessagesEventStatus.startActiveTerminal.name: MessageEvent(
+          MessagesEventStatus.terminalActivationStarted.name: MessageEvent(
             title: 'Ativando o terminal',
             subtitle: 'Por favor, aguarde...',
           ),
-          MessagesEventStatus.startPaymentProcess.name: MessageEvent(
+          MessagesEventStatus.paymentProcessStarted.name: MessageEvent(
             title: "Iniciando pagamento",
             subtitle: "Aguarde...",
           ),
-          MessagesEventStatus.startCardReading.name: MessageEvent(
+          MessagesEventStatus.cardReadingStarted.name: MessageEvent(
             title: "Aproxime o cartão",
             subtitle: "Aproxime o cartão no leitor",
           ),
-          MessagesEventStatus.startCardReadingAgain.name: MessageEvent(
+          MessagesEventStatus.cardReadingRetry.name: MessageEvent(
             title: "Reaproxime o cartão, por favor",
             subtitle: "",
           ),
-          MessagesEventStatus.completePaymentProcess.name: MessageEvent(
+          MessagesEventStatus.paymentProcessFinished.name: MessageEvent(
             title: "Processando pagamento",
             subtitle: "Aguarde um instante...",
           ),
@@ -241,7 +253,7 @@ class _MyHomePageState extends State<MyHomePage> {
             title: "Autorizando",
             subtitle: "Aguarde, por favor",
           ),
-          MessagesEventStatus.startPinInput.name: MessageEvent(
+          MessagesEventStatus.pinInputStarted.name: MessageEvent(
             title: "Inserir a senha do cartão",
             subtitle: "",
           ),
@@ -251,26 +263,31 @@ class _MyHomePageState extends State<MyHomePage> {
             icon: null,
             isVisible: true,
           ),
-          screenBackgroundColor: int.tryParse("0x7FFFFFFF"),
+          screenBackgroundColor: "#7FFFFFFF",
           errorAnimation: null,
           errorCodeTextStyle: ErrorCodeTextStyle(
-            textColor: int.tryParse("0x7FFFFFFF"),
-            fontSize: 16,
+            textColor: "#FF0A0A0A",
+            fontSize: 24,
           ),
           errorMessageTextStyle: ErrorMessageTextStyle(
-            text: "errorMessageTextStyle",
-            textColor: int.tryParse("0x7FFFFFFF"),
-            fontSize: 12,
+            // text: "errorMessageTextStyle",
+            textColor: "#FF0A0A0A",
+            fontSize: 24,
           ),
           backButtonConfiguration: BackButtonConfiguration(
             text: "Tentar novamente",
-            containerColor: int.tryParse("0x7FFFFFFF")!,
-            contentColor: 0xFF0000,
+            containerColor: "#FFB90505",
+            contentColor: "#FFFFFFFF",
             isVisible: true,
           ),
         ),
-        topCancelIcon: "assets/images/close_24dp.png",
-        statusBarColor: int.tryParse("0x7FFB8C00"),
+        topCancelIcon: "assets/images/cancel.png",
+        statusBarColor: "#FFFF5722",
+
+        //IOS
+        textColor: "#7FFF0000",
+        loadingColor: "#7FFF0000",
+        gradientStops: gradientStops,
       );
 
       SdkConfig sdkConfig = SdkConfig(
@@ -282,15 +299,17 @@ class _MyHomePageState extends State<MyHomePage> {
 
       ConfigParameters configParameters = ConfigParameters(
         credentials: credentials,
-        sdkConfig: sdkConfig
+        sdkConfig: sdkConfig,
+        environment: TapOnPhoneEnvironment(type: Environment.staging),
+        logLevel: TapOnPhoneLogLevel(level: LogLevel.debug),
       );
 
-      String result =
-          await _zoopSdkTaponphoneFlutterPlugin.setConfig(configParameters) ??
-          'SetupConfig failed';
+      bool? result = await _zoopSdkTaponphonePlugin.setConfig(configParameters);
 
       setState(() {
-        _message = result;
+        _message = result == true
+            ? 'SetConfig successfully'
+            : 'SetConfig failed';
       });
     } on PlatformException catch (e) {
       setState(() {
@@ -336,24 +355,25 @@ class _MyHomePageState extends State<MyHomePage> {
         pixNfc: true,
       );
 
-      String result =
-          await _zoopSdkTaponphoneFlutterPlugin.payByPix(pixRequest) ??
-          'Payment by Pix failed';
+      ZoopSdkPixResult? result = await _zoopSdkTaponphonePlugin.payByPix(
+        pixRequest,
+      );
 
       setState(() {
-        _pixCode = result;
+        _pixCode = result?.qrcode ?? "";
         _message = "";
       });
-    } on PlatformException catch (e) {
+    } on ZoopSdkException catch (e) {
+      debugPrint("ZoopSdkException: ${e.code} - ${e.message}");
       setState(() {
-        _message = e.message ?? "Payment error";
+        _message = "${e.code} - ${e.message}";
       });
     }
   }
 
   Future<Null> _cancelPix() async {
     try {
-      _zoopSdkTaponphoneFlutterPlugin.cancelPix();
+      _zoopSdkTaponphonePlugin.cancelPix();
       setState(() {
         _message = "Operação cancelada";
         _pixCode = "";
@@ -365,43 +385,42 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  Future<Null> _payByGateway() async {
+  Future<Null> payByGateway() async {
     try {
       setState(() {
         _message = "Await payment...";
       });
 
       final payRequest = PayRequest(
-          amount: amount,
-          paymentType: _paymentType!.value,
-          installments: installments,
-          metadata: metadata,
-          externalSeller: ExternalSeller(
-              addressLine: "addressLine",
-              softDescriptor: "softDescriptor",
-              cpfCnpj: "cpfCnpj",
-              state: "state",
-              city: "city",
-              country: "country",
-              phoneNumber: "phoneNumber",
-              zipCode: "zipCode",
-              subMerchantId: "subMerchantId",
-              merchantCategoryCode: "merchantCategoryCode",
-              name: "name"
-          )
+        amount: amount,
+        paymentType: _paymentType!.value,
+        installments: installments,
+        metadata: metadata,
+        externalSeller: ExternalSeller(
+          addressLine: "addressLine",
+          softDescriptor: "softDescriptor",
+          cpfCnpj: "cpfCnpj",
+          state: "state",
+          city: "city",
+          country: "country",
+          phoneNumber: "phoneNumber",
+          zipCode: "zipCode",
+          subMerchantId: "subMerchantId",
+          merchantCategoryCode: "merchantCategoryCode",
+          name: "name",
+        ),
       );
-      String result =
-          await _zoopSdkTaponphoneFlutterPlugin.payByGateway(payRequest) ?? 'Payment failed';
+      ZoopSdkResult? result = await _zoopSdkTaponphonePlugin.payByGateway(
+        payRequest,
+      );
 
       setState(() {
-        _message = result;
-        debugPrint(
-          "applicationEvent[Flutter] called: ${ApplicationEvent.fromValue(result)}",
-        );
+        _message = result!.transactionId;
       });
-    } on PlatformException catch (e) {
+    } on ZoopSdkException catch (e) {
+      debugPrint("ZoopSdkException: ${e.code} - ${e.message}");
       setState(() {
-        _message = e.message ?? "Payment error";
+        _message = "${e.code} - ${e.message}";
       });
     }
   }
@@ -651,7 +670,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: _payByGateway,
+                      onPressed: payByGateway,
                       style: ElevatedButton.styleFrom(
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(
@@ -739,7 +758,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ],
         ),
-      )
+      ),
     );
   }
 }
