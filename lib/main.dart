@@ -10,7 +10,7 @@ import 'package:zoop_sdk_taponphone_flutter/zoop_sdk_taponphone_library.dart';
 void main() async {
   await dotenv.load(fileName: ".env"); // Carrega o arquivo .env
 
-  if(Platform.isAndroid) {
+  if (Platform.isAndroid) {
     ZoopSdkTaponphone().kernelInitialize();
   }
   runApp(MaterialApp(home: MyApp()));
@@ -106,11 +106,11 @@ class _MyHomePageState extends State<MyHomePage> {
         _message = "Await Initialization...";
       });
 
-      ZoopSdkInitializationStatus? result = await _zoopSdkTaponphonePlugin.initialize();
+      ZoopSdkInitializationStatus? result = await _zoopSdkTaponphonePlugin
+          .initialize();
 
       setState(() {
-        _message = result?.name  ??
-            'SDK initialization failed';
+        _message = result?.name ?? 'SDK initialization failed';
       });
     } on ZoopSdkException catch (e) {
       debugPrint("ZoopSdkException: ${e.code} - ${e.message}");
@@ -127,21 +127,21 @@ class _MyHomePageState extends State<MyHomePage> {
       });
 
       final payRequest = PayRequest(
-          amount: amount,
-          paymentType: _paymentType!.value,
-          installments: installments,
-          metadata: metadata
+        amount: amount,
+        paymentType: _paymentType!.value,
+        installments: installments,
+        metadata: metadata,
       );
 
-      final ZoopSdkResult? result = await _zoopSdkTaponphonePlugin.pay(payRequest);
-      print("LETICIA Payment $result");
-      print("LETICIA Payment successful, transactionId: ${result!.transactionId}");
+      final ZoopSdkResult? result = await _zoopSdkTaponphonePlugin.pay(
+        payRequest,
+      );
 
       setState(() {
-        _message = "Payment successful, transactionId: ${result!.transactionId}";
+        _message =
+            "Payment successful, transactionId: ${result!.transactionId}";
       });
     } on ZoopSdkException catch (e) {
-      print("LETICIA ZoopSdkException: ${e.code} - ${e.message}");
       setState(() {
         _message = "${e.code} - ${e.message}";
       });
@@ -155,7 +155,10 @@ class _MyHomePageState extends State<MyHomePage> {
       });
       final beepVolume = this.beepVolume;
       BeepVolumeConfig? beepVolumeConfig;
-      Attestation attestation = Attestation(clientId: clientId, clientSecret: clientSecret);
+      Attestation attestation = Attestation(
+        clientId: clientId,
+        clientSecret: clientSecret,
+      );
       Credentials credentials = Credentials(
         clientId: clientId,
         clientSecret: clientSecret,
@@ -176,16 +179,8 @@ class _MyHomePageState extends State<MyHomePage> {
       }
 
       var gradientStops = List<GradientStop>.of([
-        GradientStop(
-          color: "7FFF0000",
-          location: 0.0,
-          opacity: 1.0,
-        ),
-        GradientStop(
-          color: "7FFFFFFF",
-          location: 1.0,
-          opacity: 1.0,
-        )
+        GradientStop(color: "7FFF0000", location: 0.0, opacity: 1.0),
+        GradientStop(color: "7FFFFFFF", location: 1.0, opacity: 1.0),
       ]);
 
       TapOnPhoneTheme theme = TapOnPhoneTheme(
@@ -200,15 +195,24 @@ class _MyHomePageState extends State<MyHomePage> {
         brandBackgroundColor: "#FFF00000",
         cardAnimation: "assets/animations/card_animation.json",
         cardAnimationResources: {
-          CardAnimationType.terminalActivationStarted.name: "assets/animations/start_activate_terminal.json",
-          CardAnimationType.terminalActivationFinished.name: "assets/animations/complete_activate_terminal.json",
-          CardAnimationType.paymentProcessStarted.name: "assets/animations/start_payment_process.json",
-          CardAnimationType.startContactlessReading.name: "assets/animations/start_contactless_reading.json",
-          CardAnimationType.authorisingPleaseWait.name: "assets/animations/authorising_please_wait.json",
-          CardAnimationType.cardReadingStarted.name: "assets/animations/start_card_reading.json",
-          CardAnimationType.cardReadingRetry.name: "assets/animations/start_card_reading_again.json",
-          CardAnimationType.tryAnotherCard.name: "assets/animations/try_another_card.json",
-          CardAnimationType.holdCardSteady.name: "assets/animations/card_animation.json"
+          CardAnimationType.terminalActivationStarted.name:
+              "assets/animations/start_activate_terminal.json",
+          CardAnimationType.terminalActivationFinished.name:
+              "assets/animations/complete_activate_terminal.json",
+          CardAnimationType.paymentProcessStarted.name:
+              "assets/animations/start_payment_process.json",
+          CardAnimationType.startContactlessReading.name:
+              "assets/animations/start_contactless_reading.json",
+          CardAnimationType.authorisingPleaseWait.name:
+              "assets/animations/authorising_please_wait.json",
+          CardAnimationType.cardReadingStarted.name:
+              "assets/animations/start_card_reading.json",
+          CardAnimationType.cardReadingRetry.name:
+              "assets/animations/start_card_reading_again.json",
+          CardAnimationType.tryAnotherCard.name:
+              "assets/animations/try_another_card.json",
+          CardAnimationType.holdCardSteady.name:
+              "assets/animations/card_animation.json",
         },
         cardAnimationArrangement: Bottom(marginBottom: 500),
         cardAnimationSize: 512,
@@ -241,7 +245,7 @@ class _MyHomePageState extends State<MyHomePage> {
             title: "Reaproxime o cartão, por favor",
             subtitle: "",
           ),
-          MessagesEventStatus.paymentProcessStarted.name: MessageEvent(
+          MessagesEventStatus.paymentProcessFinished.name: MessageEvent(
             title: "Processando pagamento",
             subtitle: "Aguarde um instante...",
           ),
@@ -303,7 +307,9 @@ class _MyHomePageState extends State<MyHomePage> {
       bool? result = await _zoopSdkTaponphonePlugin.setConfig(configParameters);
 
       setState(() {
-        _message = result == true ? 'SetConfig successfully' : 'SetConfig failed';
+        _message = result == true
+            ? 'SetConfig successfully'
+            : 'SetConfig failed';
       });
     } on PlatformException catch (e) {
       setState(() {
@@ -386,25 +392,27 @@ class _MyHomePageState extends State<MyHomePage> {
       });
 
       final payRequest = PayRequest(
-          amount: amount,
-          paymentType: _paymentType!.value,
-          installments: installments,
-          metadata: metadata,
-          externalSeller: ExternalSeller(
-              addressLine: "addressLine",
-              softDescriptor: "softDescriptor",
-              cpfCnpj: "cpfCnpj",
-              state: "state",
-              city: "city",
-              country: "country",
-              phoneNumber: "phoneNumber",
-              zipCode: "zipCode",
-              subMerchantId: "subMerchantId",
-              merchantCategoryCode: "merchantCategoryCode",
-              name: "name"
-          )
+        amount: amount,
+        paymentType: _paymentType!.value,
+        installments: installments,
+        metadata: metadata,
+        externalSeller: ExternalSeller(
+          addressLine: "addressLine",
+          softDescriptor: "softDescriptor",
+          cpfCnpj: "cpfCnpj",
+          state: "state",
+          city: "city",
+          country: "country",
+          phoneNumber: "phoneNumber",
+          zipCode: "zipCode",
+          subMerchantId: "subMerchantId",
+          merchantCategoryCode: "merchantCategoryCode",
+          name: "name",
+        ),
       );
-      ZoopSdkResult? result = await _zoopSdkTaponphonePlugin.payByGateway(payRequest);
+      ZoopSdkResult? result = await _zoopSdkTaponphonePlugin.payByGateway(
+        payRequest,
+      );
 
       setState(() {
         _message = result!.transactionId;
@@ -750,7 +758,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ],
         ),
-      )
+      ),
     );
   }
 }
